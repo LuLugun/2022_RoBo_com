@@ -1,1 +1,2 @@
-# 2022_RoBo_com
+pip install Flask-Cors
+pip install Flask
