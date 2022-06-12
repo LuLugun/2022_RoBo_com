@@ -1,37 +1,81 @@
 import numpy as np
-
+import pymysql
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-x1 ,x2 ,x3 = 0 ,0 ,0
+
+def sql_connect(host,port,user,passwd,database):
+    global db,cursor
+    try:
+        db=pymysql.connect(host=host,user=user,passwd=passwd,database=database,port =port)
+        #os.system('cls')
+        cursor=db.cursor()
+        return True
+    except pymysql.Error as e:
+        print("連線失敗:"+str(e))
+        return False
+def sql_insert(value,remark):
+    sql = '''INSERT INTO `api_test`(`value`, `remark`) VALUES ('%s','%s')'''%(value,remark)
+    cursor.execute(sql)
+    db.commit()
+    
+def sql_select_get():
+    sql = '''SELECT * FROM `api_test` ORDER BY `input time` DESC LIMIT 1'''
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    return result[0]
+
 @app.route('/post', methods=['POST'])
 def postInput():
-    global x1 ,x2 ,x3
     insertValues = request.get_json()
-    x1=insertValues['number_of_people']
-    x2=insertValues['length']
-    x3=insertValues['wait']
-
-    return jsonify({'return': str(x1)+','+str(x2)+','+str(x3)})
+    value=insertValues['value']
+    remark=insertValues['remark']
+    if sql_connect('localhost',3304,'root','','robo_com'):
+        try:
+            sql_insert(value,remark)
+            return 'return : insert success'
+        except pymysql.Error as e:
+            return  'return : '+str(e)
+    else:
+        return 'return : SQL connect FAIL'
 
 @app.route('/get', methods=['GET'])
 def get():
-    return jsonify({'return': str(x1)+','+str(x2)+','+str(x3)})
+    if sql_connect('localhost',3304,'root','','robo_com'):
+        get_result = sql_select_get()
+        return jsonify({'input time': get_result[0],
+                            'number': get_result[1],
+                            'value': get_result[2],
+                            'remark': get_result[3]})
+    else:
+        return 'return : SQL connect FAIL'
 
 @app.route('/put', methods=['PUT'])
 def putInput():
-    global x1 ,x2 ,x3
     insertValues = request.get_json()
-    x1=insertValues['number_of_people']
-    x2=insertValues['length']
-    x3=insertValues['wait']
-    return 'PUT success'
+    value=insertValues['value']
+    remark=insertValues['remark']
+    if sql_connect('localhost',3304,'root','','robo_com'):
+        try:
+            sql_insert(value,remark)
+            return 'return : insert success'
+        except pymysql.Error as e:
+            return  'return : '+str(e)
+    else:
+        return 'return : SQL connect FAIL'
+
 @app.route('/put/x1/<int:id>', methods=['PUT'])
 def putx1Input(id):
-    global x1
-    x1=id
-    return 'x1 revise success'
+    if sql_connect('localhost',3304,'root','','robo_com'):
+        try:
+            sql_insert(value = id,remark = 'None')
+            return 'return : insert success'
+        except pymysql.Error as e:
+            return  'return : '+str(e)
+    else:
+        return 'return : SQL connect FAIL'
+
 if __name__ == '__main__':
     app.run()
