@@ -16,6 +16,7 @@ def sql_connect(host,port,user,passwd,database):
     except pymysql.Error as e:
         print("連線失敗:"+str(e))
         return False
+
 def sql_insert(value,remark):
     sql = '''INSERT INTO `api_test`(`value`, `remark`) VALUES ('%s','%s')'''%(value,remark)
     cursor.execute(sql)
@@ -35,22 +36,22 @@ def postInput():
     if sql_connect('localhost',3304,'root','','robo_com'):
         try:
             sql_insert(value,remark)
-            return 'return : insert success'
+            return 'return : insert success', 200
         except pymysql.Error as e:
-            return  'return : '+str(e)
+            return  'return : '+str(e), 400
     else:
-        return 'return : SQL connect FAIL'
+        return 'return : SQL connect FAIL', 500
 
 @app.route('/get', methods=['GET'])
 def get():
     if sql_connect('localhost',3304,'root','','robo_com'):
         get_result = sql_select_get()
-        return jsonify({'input time': get_result[0],
+        return {'input time': get_result[0],
                             'number': get_result[1],
                             'value': get_result[2],
-                            'remark': get_result[3]})
+                            'remark': get_result[3]}, 200
     else:
-        return 'return : SQL connect FAIL'
+        return 'return : SQL connect FAIL', 500
 
 @app.route('/put', methods=['PUT'])
 def putInput():
@@ -60,22 +61,22 @@ def putInput():
     if sql_connect('localhost',3304,'root','','robo_com'):
         try:
             sql_insert(value,remark)
-            return 'return : insert success'
+            return 'return : insert success', 200
         except pymysql.Error as e:
-            return  'return : '+str(e)
+            return  'return : '+str(e), 400
     else:
-        return 'return : SQL connect FAIL'
+        return 'return : SQL connect FAIL', 500
 
 @app.route('/put/x1/<int:id>', methods=['PUT'])
 def putx1Input(id):
     if sql_connect('localhost',3304,'root','','robo_com'):
         try:
             sql_insert(value = id,remark = 'None')
-            return 'return : insert success'
+            return 'return : insert success', 200
         except pymysql.Error as e:
-            return  'return : '+str(e)
+            return  'return : '+str(e), 400
     else:
-        return 'return : SQL connect FAIL'
+        return 'return : SQL connect FAIL', 500
 
 if __name__ == '__main__':
     app.run()
