@@ -2,7 +2,7 @@
 
 [資料記錄2](https://www.raspberrypi.com/documentation/accessories/camera.html#raspicam-commands)
 
-[資料記錄3](https://www.raspberrypi.com/documentation/accessories/camera.html#raspicam-commands)
+[資料記錄3](https://jasonblog.github.io/note/media_player/c++_ying_xiang_chuan_liu_raspberry_pi_camera_rtsp_.html)
 
 [範例影片](https://www.youtube.com/watch?v=V9QT0KmBp9s)
 
