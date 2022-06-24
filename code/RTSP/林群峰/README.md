@@ -6,4 +6,4 @@
 
 [範例影片](https://www.youtube.com/watch?v=V9QT0KmBp9s)
 
-![Alt text](2022_RoBo_com/code/RTSP/林群峰/Screenshot 2022-06-24 18.25.30.png)
+![Alt text](https://github.com/LuLugun/2022_RoBo_com/blob/main/code/RTSP/%E6%9E%97%E7%BE%A4%E5%B3%B0/Screenshot%202022-06-24%2018.25.30.png)
