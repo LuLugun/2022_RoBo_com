@@ -34,6 +34,8 @@ RTSP
 
 + 2-10.cvlc rtsp://robo.com.rtsp:123456@192.168.11.170:554/stream1 :sout='#std{access=http,mux=ts,dst=:8080}'(rtsp轉http語法)
 + 2-11.cvlc rtsp://robo.com.rtsp:123456@192.168.11.170:554/stream1 :sout='#rtp{sdp=rtsp://:8554/motn}'(rtsp轉rtsp語法)
+
+
 3.Ngrok
 ------
 ### 3-1.Ngrok指令
