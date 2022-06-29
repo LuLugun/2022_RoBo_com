@@ -31,6 +31,9 @@ RTSP
 + 2-8.之後出現有三角錐的畫面，且下面的時間條有在計時代表成功
 + 2-9.以上範例產生的HTTP為:http://localhost:8080/test
 + [RTSP轉HTTP教學](https://blog.csdn.net/weixin_47882573/article/details/118380416)
+
++ 2-10.cvlc rtsp://robo.com.rtsp:123456@192.168.11.170:554/stream1 :sout='#std{access=http,mux=ts,dst=:8080}'(rtsp轉http語法)
++ 2-11.cvlc rtsp://robo.com.rtsp:123456@192.168.11.170:554/stream1 :sout='#rtp{sdp=rtsp://:8554/motn}'(rtsp轉rtsp語法)
 3.Ngrok
 ------
 ### 3-1.Ngrok指令
