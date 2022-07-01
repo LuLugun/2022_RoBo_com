@@ -1,10 +1,21 @@
 import numpy as np
 import pymysql
+import os
+import pathlib
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+
+SRC_PATH = pathlib.Path(__file__).parent.absolute()
+UPLOAD_FOLDER = os.path.join(SRC_PATH,'jpg_save')
 
 app = Flask(__name__)
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'bmp'])
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
+
+def allow_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def sql_connect(host,port,user,passwd,database):
     global db,cursor
@@ -77,6 +88,22 @@ def putx1Input(id):
             return  'return : '+str(e), 400
     else:
         return 'return : SQL connect FAIL', 500
+
+@app.route('/jpg', methods=['POST'])
+def upload_file():
+
+    if request.method == 'POST':
+
+        f = request.files.get('files')
+        if f is None:
+            return jsonify({"Status": "Error 0000", "Msg": "没有上传图片，请重新上传!"})
+
+        if not allow_file(f.filename):
+            return jsonify({"Status": "Error 9999", "Msg": "文件格式不支持，仅支持如下图片格式:'png', 'jpg', 'bmp'。"})
+
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    return "Successful"
 
 if __name__ == '__main__':
     app.run()
