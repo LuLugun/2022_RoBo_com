@@ -1,6 +1,6 @@
-path : D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\yolov5\data
-train: D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\yolov5\data\images  # train images (relative to 'path') 118287 images
-val: D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\yolov5\data\images  # val images (relative to 'path') 5000 images
+path : D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\data
+train: D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\data\images  # train images (relative to 'path') 118287 images
+val: D:\Sourcrtree\2022_RoBo_com\code\人流辨識\林群峰\data\images  # val images (relative to 'path') 5000 images
 
 
 # Classes
