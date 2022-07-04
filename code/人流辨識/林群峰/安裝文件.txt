@@ -1,0 +1,13 @@
+安裝python:https://www.python.org/downloads/release/python-379/
+安裝vs2019 and c++桌面開發工具:https://code.visualstudio.com/download
+安裝vscode:https://code.visualstudio.com/download
+安裝CUDA:https://developer.nvidia.com/cuda-toolkit
+安裝pytorch:https://pytorch.org/
+安裝cmder:https://cmder.net/
+git clone https://github.com/ultralytics/yolov5
+bash yolov5/data/scripts/get_coco.sh
+cd yolov5
+pip install opencv-python
+pip install -U pycocotools
+pip install -r requirements.txt
+
