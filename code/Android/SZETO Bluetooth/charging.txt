@@ -1,1 +1,0 @@
-https://github.com/robotemi/sdk/blob/master/docs/sdk/com.robotemi.sdk/-battery-data/index.md
