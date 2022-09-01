@@ -7,6 +7,7 @@ output = ser1.readline().decode('utf-8').rstrip() #讀取樹梅派輸出
 
 
 # 網路範例
+# https://zhuanlan.zhihu.com/p/165107539
 
 import serial
 
