@@ -24,7 +24,7 @@ while True:
             url = "http://86e0-27-52-33-129.ngrok.io/put/robo_state/1"
             response = requests.request("PUT", url)
             response = response.json()
-            if response['robo_state'] == 1:
+            if response['robo_state'] == 1 or response['robo_state'] == 0:
                 print('狀態改變成功:maintain')
                 bluetoothSerial.write(b'btnOff\r\n')
             else:
