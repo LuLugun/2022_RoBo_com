@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from models.common import DetectMultiBackend
-from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadStreams
+from utils.datasets import IMG_FORMATS, VID_FORMATS, LoadImages, LoadStreams
 from utils.general import (LOGGER, check_file, check_img_size, check_imshow, check_requirements, colorstr,
                            increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
@@ -23,7 +23,7 @@ import numpy as np
 import random
 import pyimgur
 
-names =  ['sporadic','nobudy','crowded']
+names =  ['0','1','2','3']
 conf_thres=0.25
 iou_thres=0.45
 classes = None
@@ -34,7 +34,7 @@ project=ROOT / 'runs/detect'
 name='results'
 exist_ok=False
 save_txt=False
-weights='robo_best.pt'
+weights='robo_V1.1.pt'
 imgsz=(1080, 1920)
 half=False
 augment=False
@@ -42,6 +42,10 @@ visualize=False
 dnn=False
 data=ROOT / 'data/robo_com.yaml'
 colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+device = select_device()
+model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data)
+
+
 def plot_one_box(x, img, color=None, label=None, line_thickness=None):
     # Plots one bounding box on image img
     tl = line_thickness or round(0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
@@ -96,9 +100,6 @@ def jpg_to_url(path):
 
 def model_detect(img_path):
     frame = cv2.imread(img_path)
-    device = select_device()
-    model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data)
-
     img = letterbox(frame)[0]
     img = img[:, :, ::-1].transpose(2, 0, 1)
     img = np.ascontiguousarray(img)
@@ -118,13 +119,22 @@ def model_detect(img_path):
     for idx, (*xyxy, conf, cls) in enumerate(reversed(results)):
         label = '%s %.2f' % (names[int(cls)], conf)
         label_commit.append(names[int(cls)])
-        label_commit.append(conf)
+        label_commit.append(conf.item())
         plot_one_box(xyxy, frame, label=label, color=colors[int(cls)], line_thickness=2)
-    
+    if label_commit == []:
+        img_path = img_path.replace('original','need_train').replace('.jpg','_detect.jpg')
     #os.remove(img_path)
-    img_path = img_path.replace('.jpg','_detect.jpg')
+    else:
+        img_path = img_path.replace('original','detect').replace('.jpg','_detect.jpg')
+        if len(label_commit) > 2:
+            if label_commit[1] > label_commit[3]:
+                result_label = [label_commit[0],label_commit[1]]
+            else:
+                result_label = [label_commit[2],label_commit[3]]
+        else:
+            result_label = label_commit
     cv2.imwrite(img_path,frame)
-    return label_commit
+    return result_label
     #img_url = jpg_to_url(img_path)
 
     #return img_url
