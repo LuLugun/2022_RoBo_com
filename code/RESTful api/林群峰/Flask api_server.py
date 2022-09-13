@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from robo_function import *
+from flight_function import *
 import datetime
 import time
 import json
@@ -17,10 +18,18 @@ app = Flask(__name__)
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'bmp'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
+driver = webdriver.Chrome(chrome_options = chromeoptions)
+
 
 def allow_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def getday():
+    the_date = datetime.date.today()
+    result_date = the_date + datetime.timedelta(days=-1)
+    d = result_date.strftime('%Y/%m/%d')
+    return d
+    
 def sql_connect(host,port,user,passwd,database):
     global db,cursor
     try:
@@ -61,6 +70,55 @@ def sql_select_get_robo_state():
     result=cursor.fetchall()
     return result[0]
 
+def sql_select_get_number(country):
+    sql = '''SELECT DISTINCT `COL 3`,`COL 5` FROM `fidspassenger` WHERE `COL 12` LIKE '%'''+str(country)+'''%';'''
+    #print(sql)
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    if str(result) == '()':
+        return 'None'
+    else:
+        return json.dumps(result)
+
+def sql_chin_country_select(country):
+    the_date = datetime.date.today()
+    the_date = the_date.strftime('%Y/%m/%d')
+    now_time = time.localtime()
+    now_time = time.strftime('%H:%M:%S',now_time)
+    sql = '''SELECT `COL 1` ,`COL 3` ,`COL 5` ,`COL 20` FROM `fidspassenger` WHERE `COL 13` LIKE '%%%s%%' and `COL 20` != '' AND `COL 7` > '%s' AND `COL 8` > '%s' or (`COL 13` LIKE '%%%s%%' and `COL 20` != '' AND `COL 7` > '%s');'''%(country,getday(),now_time,country,the_date)
+    print(sql)
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    if str(result) == '()':
+        return 'None'
+    else:
+        return result
+
+def sql_english_country_select(country):
+    the_date = datetime.date.today()
+    the_date = the_date.strftime('%Y/%m/%d')
+    now_time = time.localtime()
+    now_time = time.strftime('%H:%M:%S',now_time)
+    sql = '''SELECT `COL 1` ,`COL 3` ,`COL 5` ,`COL 20` FROM `fidspassenger` WHERE `COL 12` LIKE '%%%s%%' and `COL 20` != '' AND `COL 7` > '%s' AND `COL 8` > '%s' or (`COL 12` LIKE '%%%s%%' and `COL 20` != '' AND `COL 7` > '%s');'''%(country,getday(),now_time,country,the_date)
+    
+    #print(sql)
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    if str(result) == '()':
+        return 'None'
+    else:
+        return result
+
+def sql_select_get_number(country):
+    sql = '''SELECT DISTINCT `COL 3`,`COL 5` FROM `fidspassenger` WHERE `COL 12` LIKE '%'''+str(country)+'''%';'''
+    #print(sql)
+    cursor.execute(sql)
+    result=cursor.fetchall()
+    if str(result) == '()':
+        return 'None'
+    else:
+        return json.dumps(result)
+
 def sql_select_get_flight(number):
     airline = number[:2]
     shift = number[2:]
@@ -69,7 +127,7 @@ def sql_select_get_flight(number):
     now_time = time.localtime()
     now_time = time.strftime('%H:%M:%S',now_time)
     sql = '''SELECT * FROM `fidspassenger` WHERE `COL 3` = '%s' AND `COL 5` = %s and `COL 20` != '' AND `COL 7` > '%s' AND `COL 8` > '%s' or (`COL 3` = '%s' AND `COL 5` = '%s' and `COL 20` != '' AND `COL 7` > '%s');'''%(airline,shift,getday(),now_time,airline,shift,the_date)
-    print(sql)
+    #print(sql)
     cursor.execute(sql)
     result=cursor.fetchall()
     if str(result) == '()':
@@ -82,11 +140,24 @@ def sql_updata_robo_state(value):
     cursor.execute(sql)
     db.commit()
 
-def getday():
-    the_date = datetime.date.today()
-    result_date = the_date + datetime.timedelta(days=-1)
-    d = result_date.strftime('%Y/%m/%d')
-    return d
+def is_all_chinese(strs):
+    for _char in strs:
+        if not '\u4e00' <= _char <= '\u9fa5':
+            return False
+    return True
+
+@app.route('/post/select/<string:country>', methods=['POST'])
+def postflight_select(country):
+    driver.get("https://www.taoyuan-airport.com/flight_depart?k=&time=all")
+    Web_Driver_Wait(driver,'board')
+    local_time = time.localtime()
+    if local_time.tm_hour >= 18:
+        change_time(driver)
+        time.sleep(1)
+    input_Keyword_search(driver,country)
+    time.sleep(2)
+    result_date = get_data(driver)
+    return result_date
 
 
 
@@ -112,6 +183,30 @@ def postflight(number):
             return str(result)
         except pymysql.Error as e:
             return  'return : '+str(e), 400
+    else:
+        return 'return : SQL connect FAIL', 500
+
+@app.route('/post/country/<string:country>', methods=['POST'])
+def postcountry(country):
+    data_dict = {'label':[]}
+    if sql_connect('localhost',3306,'root','','robo_com'):
+        if is_all_chinese(country):
+            result = sql_chin_country_select(country)
+            if result != 'None':
+                for i in result:
+                    data_dict['label'].append(i[1]+i[2])
+                    data_dict[i[1]+i[2]] = {'terminal':i[0],'counter':i[3]}
+        else:
+            result = sql_english_country_select(country)
+            #print(result)
+            if result != 'None':
+                for i in result:
+                    data_dict['label'].append(i[1]+i[2])
+                    data_dict[i[1]+i[2]] = {'terminal':i[0],
+                                                'counter':i[3]}
+        return data_dict
+
+
     else:
         return 'return : SQL connect FAIL', 500
 
@@ -210,5 +305,6 @@ def upload_file():
                 return 'return : SQL connect FAIL', 500
         else:
             return "Successful"
+
 if __name__ == '__main__':
     app.run()
